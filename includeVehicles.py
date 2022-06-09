@@ -7,17 +7,16 @@ def constructVehicles(instance : CVRPInstance, params: ParamsVehicles):
     vehicles = []
     id_v = 1
     for v in range(len(params.types)):
-        for num in params.num_types:
-            for i in range(num):
-                vehicle = Vehicle(
-                    id = id_v,
-                    type_vehicle = params.types[v],
-                    capacity = params.capacities[v],
-                    cust = params.custs[v],
-                    origin = instance.origin
-                )
-                vehicles.append(vehicle)
-                id_v += 1
+        for _ in range(params.num_types[v]):
+            vehicle = Vehicle(
+                id = id_v,
+                type_vehicle = params.types[v],
+                capacity = params.capacities[v],
+                cust = params.custs[v],
+                origin = instance.origin
+            )
+            vehicles.append(vehicle)
+            id_v += 1
     return vehicles
 
 
@@ -27,7 +26,7 @@ def instanceToHeterogene(
     name = instance.name
     region = instance.region
     origin = instance.origin
-    vehicles = constructVehicles(paramsVehicles)
+    vehicles = constructVehicles(instance, paramsVehicles)
     deliveries = instance.deliveries
     return CVRPInstanceHeterogeneous(
         name,
@@ -40,14 +39,18 @@ def instanceToHeterogene(
 def recreate(dayStart, dayFinish, cities):
     nameDirIn = "data/cvrp-instances-1.0/dev/"
     nameDirOut = "data/cvrp-instances-2.0/dev/"
-    nameParams = "data/cvrp-instances-2.0/params/"
+    nameDirParam = "data/cvrp-instances-2.0/params/"
     for city in cities:
         for day in range(dayStart, dayFinish):
             instanceDir = nameDirIn + city + "/"
-            nameInstance = "cvrp-0"+city+"-"+day
-            fileDir = instanceDir + nameInstance
+            nameInstance = "cvrp-"+city.split('-')[1]+"-"+city.split('-')[0]+"-"+str(day)
+            fileDir = instanceDir + nameInstance + ".json"
             instance = CVRPInstance.from_file(fileDir)
-            instance_heterogeneoun = instanceToHeterogene(instance)
+            nameParam = "param-"+city.split('-')[1]+"-"+city.split('-')[0]+"-"+str(day)
+            paramDir = nameDirParam + city + "/" + nameParam + ".json"
+            paramsVehicles = ParamsVehicles.from_file(paramDir)
+            instance_heterogeneoun = instanceToHeterogene(instance, paramsVehicles)
+            instance_heterogeneoun.to_file(nameDirOut + city + "/"+ nameInstance + ".json")
 
     return 
 

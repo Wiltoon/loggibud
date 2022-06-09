@@ -1,3 +1,4 @@
+from math import ceil
 from loggibud.v1.types import CVRPInstance, ParamsVehicles
 
 
@@ -11,9 +12,9 @@ def createParams(init, finish, cities):
             instance = CVRPInstance.from_file(dirin + city + '/'+intance)
             total_carga = sum(delivery.size for delivery in instance.deliveries)
             min_route_simple = total_carga/instance.vehicle_capacity
-            type1 = int(0.4*min_route_simple) # 40% do total de carga
-            type2 = int(type1/2) # 20% do total de carga
-            type3 = int(type2/2) # 10% do total de carga
+            type1 = ceil(0.4*min_route_simple) # 40% do total de carga
+            type2 = ceil(type1/2) # 20% do total de carga
+            type3 = ceil(type2/2) # 10% do total de carga
             param = ParamsVehicles(
                 types=      ["MOTOCYCLE", "VAN", "TRUCK"],
                 capacities= [180, 360, 540],
@@ -26,5 +27,5 @@ def createParams(init, finish, cities):
 if __name__ == "__main__":
     cities = ["pa-0","df-0","rj-0"]
     dayStart = 90
-    dayFinish = 119
+    dayFinish = 120
     createParams(dayStart, dayFinish, cities)
