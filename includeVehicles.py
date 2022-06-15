@@ -36,10 +36,10 @@ def instanceToHeterogene(
         deliveries
     )
 
-def recreate(dayStart, dayFinish, cities):
+def recreate(dayStart, dayFinish, cities, tip):
     nameDirIn = "data/cvrp-instances-1.0/dev/"
-    nameDirOut = "data/cvrp-instances-2.0/dev/"
-    nameDirParam = "data/cvrp-instances-2.0/params/"
+    nameDirOut = "data/cvrp-instances-"+tip+"/dev/"
+    nameDirParam = "data/cvrp-instances-"+tip+"/params/"
     for city in cities:
         for day in range(dayStart, dayFinish):
             instanceDir = nameDirIn + city + "/"
@@ -57,5 +57,6 @@ def recreate(dayStart, dayFinish, cities):
 if __name__ == "__main__":
     cities = ["pa-0","df-0","rj-0"]
     dayStart = 90
-    dayFinish = 119
-    recreate(dayStart, dayFinish, cities)
+    dayFinish = 120
+    tip = "3.0" # tip 2.0 = HETEROGENEO, 3.0 = HOMOGENEO
+    recreate(dayStart, dayFinish, cities, tip)

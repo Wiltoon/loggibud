@@ -136,10 +136,10 @@ def main():
     path_outcsv = "output/vehicles/"
     path_outimgs = "output/imgs/vehicles/"
     cities = ["pa-0"] 
-    num_days = 30
+    num_days = 5
     output = "data/results/"
     path_input = "data/cvrp-instances-1.0/dev/"
-    methods = ["kpmip", "kpmipo"]
+    methods = ["ccpvrp", "kpmipo"]
     for dir_city in cities:
         for day in range(90,90+num_days):
             try:

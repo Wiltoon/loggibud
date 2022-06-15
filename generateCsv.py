@@ -48,7 +48,7 @@ def rowCreateOptimizate(inst_path, sol_path, w, method, osrm_config):
     line.append(sum(results))
     line.append(solution.time_exec)
     line.append(len(solution.vehicles))
-    line.append(mean([sum([d.size for d in v.deliveries]) for v in solution.vehicles]))
+    # line.append(mean([sum([d.size for d in v.deliveries]) for v in solution.vehicles]))
     w.writerow(line)
 
 def rowCreateBasicsMethods(inst_path, sol_path, w, method, osrm_config):
@@ -64,7 +64,7 @@ def rowCreateBasicsMethods(inst_path, sol_path, w, method, osrm_config):
     line.append(sum(results))
     line.append(solution.time_exec)
     line.append(len(solution.vehicles))
-    line.append(mean([sum([d.size for d in v.deliveries]) for v in solution.vehicles]))
+    # line.append(mean([sum([d.size for d in v.deliveries]) for v in solution.vehicles]))
     w.writerow(line)
 
 
@@ -84,7 +84,7 @@ def rowCreateKpprrf(inst_path, sol_path, w, method, osrm_config):
     line.append(sum(results))
     line.append(solution.time_execution) # + solKmeans.time_execution
     line.append(solution.total_vehicles)
-    line.append(mean([sum([d.size for d in v.deliveries]) for v in solution.vehicles]))
+    # line.append(mean([sum([d.size for d in v.deliveries]) for v in solution.vehicles]))
     w.writerow(line)
     # instance_broke = inst_path.split('.')
     # print(instance_broke)
@@ -125,7 +125,7 @@ def generateGeneralCsv(
             try:
                 if method == "kpprrf":
                     rowCreateKpprrf(inst_path, sol_path, w, method, osrm_config)
-                elif method == "krs" or method == "krso" or method == "krsof":
+                elif method == "krs" or method == "krso" or method == "krsof" or method == "ccpmipo" or method == "ccpmipohomo":
                     rowCreateOptimizate(inst_path, sol_path, w, method, osrm_config)
                 else:
                     rowCreateBasicsMethods(inst_path, sol_path, w, method, osrm_config)
@@ -159,11 +159,11 @@ def computeCapacityRoute(vehicle):
 def main():    
     osrm_config = OSRMConfig(host="http://ec2-34-222-175-250.us-west-2.compute.amazonaws.com")
     path_outcsv = "output/csvs/"
-    cities = ["rj-0"] 
-    num_days = 30
+    cities = ["pa-0"] 
+    num_days = 20
     output = "data/results/"
     path_input = "data/cvrp-instances-1.0/dev/"
-    methods = ["krsof"]
+    methods = ["ccpmip", "ccpmipo", "ccpvrp", "ccpmipohomo"]
     for city in cities:
         pathcsv = path_outcsv + city + '/generalCity.csv'
         generateGeneralCsv(
