@@ -63,7 +63,7 @@ def createDistances(
 def selectSolution(method: str, solution_path: str):
     if method == "kpprrf" or method == "kpmip":
         return CVRPSolutionKpprrf.from_file(solution_path) 
-    elif method == "krsof" or method == "kpmipo":
+    elif method == "krsof" or method == "kpmipo" or method == "kvprfhete":
         return CVRPSolutionOPT.from_file(solution_path)
     else:
         return CVRPSolution.from_file(solution_path)
@@ -139,7 +139,7 @@ def main():
     num_days = 5
     output = "data/results/"
     path_input = "data/cvrp-instances-1.0/dev/"
-    methods = ["ccpvrp", "kpmipo"]
+    methods = ["kvprfhete", "ccpmipo", "lkh3"]
     for dir_city in cities:
         for day in range(90,90+num_days):
             try:

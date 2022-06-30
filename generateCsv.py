@@ -125,7 +125,7 @@ def generateGeneralCsv(
             try:
                 if method == "kpprrf":
                     rowCreateKpprrf(inst_path, sol_path, w, method, osrm_config)
-                elif method == "krs" or method == "krso" or method == "krsof" or method == "ccpmipo" or method == "ccpmipohomo":
+                elif method == "krs" or method == "krso" or method == "krsof" or method == "ccpmipo" or method == "ccpmipohomo" or method == "kvprfhete":
                     rowCreateOptimizate(inst_path, sol_path, w, method, osrm_config)
                 else:
                     rowCreateBasicsMethods(inst_path, sol_path, w, method, osrm_config)
@@ -163,7 +163,7 @@ def main():
     num_days = 20
     output = "data/results/"
     path_input = "data/cvrp-instances-1.0/dev/"
-    methods = ["ccpmip", "ccpmipo", "ccpvrp", "ccpmipohomo"]
+    methods = ["kvprfhete", "ccpmipo", "lkh3"]
     for city in cities:
         pathcsv = path_outcsv + city + '/generalCity.csv'
         generateGeneralCsv(
