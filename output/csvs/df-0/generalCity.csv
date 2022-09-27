@@ -1,0 +1,3 @@
+Algorithm;input;distance;time;n_veiculos
+kmeans-greedy;cvrp-0-df-98;2362,3821;0,0;103
+qrpsweep;cvrp-0-df-98;1594,9961;0,0;38

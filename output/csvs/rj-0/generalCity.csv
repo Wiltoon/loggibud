@@ -1,0 +1,17 @@
+Algorithm;input;distance;time;n_veiculos
+kmeans-greedy;cvrp-0-rj-100;4472,6611;0,0;212
+kmeans-greedy;cvrp-0-rj-101;4106,4834;0,0;191
+kmeans-greedy;cvrp-0-rj-102;4213,6263;0,0;200
+kmeans-greedy;cvrp-0-rj-103;4797,8711;0,0;227
+kmeans-greedy;cvrp-0-rj-104;3938,106;0,0;185
+kmeans-greedy;cvrp-0-rj-105;4667,8273;0,0;223
+kmeans-greedy;cvrp-0-rj-106;4455,5092;0,0;215
+kmeans-greedy;cvrp-0-rj-107;4220,1804;0,0;197
+qrpsweep;cvrp-0-rj-100;5775,4154;0,0;202
+qrpsweep;cvrp-0-rj-101;4895,2905;0,0;163
+qrpsweep;cvrp-0-rj-102;5141,8823;0,0;175
+qrpsweep;cvrp-0-rj-103;5841,0507;0,0;206
+qrpsweep;cvrp-0-rj-104;4579,0322;0,0;156
+qrpsweep;cvrp-0-rj-105;5909,0192;0,0;206
+qrpsweep;cvrp-0-rj-106;5571,1459;0,0;196
+qrpsweep;cvrp-0-rj-107;4969,7073;0,0;174
