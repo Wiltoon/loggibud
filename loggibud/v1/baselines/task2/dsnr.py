@@ -12,6 +12,7 @@ from pathlib import Path
 
 import numpy as np
 from tqdm import tqdm
+from loggibud.v1.distances import OSRMConfig
 
 from loggibud.v1.types import (
     Delivery,
@@ -27,8 +28,53 @@ class DynamicSearchNeighbourRoutes:
     num_packages_per_batch: int = 75
     t_closest_packages: int = 30
 
-def distributionBatch():
-    d = 1
+def distributionBatch(
+        instance: CVRPInstance, 
+        matrix_distance, 
+        k_near: int, 
+        batch_size: int, 
+        organization: str
+    ) -> CVRPSolution:
+    deliveries = []
+    vehicles_possibles = {}
+    batches = createBatchesPerPackets(instance.deliveries, batch_size)
+    vehicles = []
+    for batch in tqdm(batches, desc="DESPATCHING BATCHES"):
+        routingBatches(
+            instance,
+            batch, 
+            vehicles_possibles,
+            organization,
+            matrix_distance,
+            k_near,
+            deliveries
+        )
+
+def routingBatches(
+            instance,
+            batch, 
+            vehicles_possibles,
+            organization,
+            matrix,
+            k_near,
+            deliveries
+    ):
+    order_batch = orderBatch(batch, instance, vehicles_possibles, organization, matrix)
+    reallocate = []
+    while len(order_batch) > 0:
+        poss = [p.idu for p in order_batch]
+        pack = order_batch.popleft()
+        routePackage(
+            vehicles_possibles,
+            pack,
+            matrix,
+            order_batch,
+            k_near,
+            deliveries,
+            poss in reallocate # Cancelar a possibilidade de loop
+        )
+        reallocate.append(poss)
+    return order_batch
 
 def routePackage():
     d = 2
@@ -40,12 +86,16 @@ def solve_instance(
     return CVRPSolution(instance)
 
 if __name__ == "__main__":
-    
+    osrm_config = OSRMConfig(
+        host="http://ec2-34-222-175-250.us-west-2.compute.amazonaws.com"
+    )
     logging.basicConfig(level=logging.INFO)
     parser = ArgumentParser()
     
     parser.add_argument("--batch_size", type=str, required=True)
+    parser.add_argument("--k_near", type=str, required=True)
     parser.add_argument("--eval_instances", type=str, required=True)
+    parser.add_argument("--organization", type=str)
     parser.add_argument("--output", type=str)
     parser.add_argument("--params", type=str)
     args = parser.parse_args()
@@ -66,7 +116,13 @@ if __name__ == "__main__":
         instance = CVRPInstance.from_file(file)
 
         logger.info("Distribuition batch instance.")
-        model_finetuned = distributionBatch(model, instance)
+        solution = distributionBatch(
+            instance, 
+            matrix_distance, 
+            k_near = args.k_near, 
+            batch_size = args.batch_size, 
+            organization=args.organization
+        )
 
         logger.info("Starting to dynamic route.")
         for delivery in tqdm(instance.deliveries):

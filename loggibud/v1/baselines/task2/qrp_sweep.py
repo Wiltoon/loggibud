@@ -137,7 +137,7 @@ def pretrain(
         in equal slices. The starting angles in each slice represent the
         subregions.
     """
-    params = params or QRPParams()
+    params = params or QRPParams(num_clusters=10)
 
     points = np.array(
         [
