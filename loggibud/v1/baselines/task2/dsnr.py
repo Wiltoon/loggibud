@@ -4,17 +4,19 @@ Developer: https://www.github.com/Wiltoon
 """
 import logging
 import os
+import numpy as np
+
+from collections import deque
 from dataclasses import dataclass
 from typing import Optional, List, Dict
 from multiprocessing import Pool
 from argparse import ArgumentParser
 from pathlib import Path
-
-import numpy as np
 from tqdm import tqdm
 from loggibud.v1.distances import OSRMConfig
 
 from loggibud.v1.types import (
+    Point,
     Delivery,
     CVRPInstance,
     CVRPSolution,
@@ -25,8 +27,9 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class DynamicSearchNeighbourRoutes:
-    num_packages_per_batch: int = 75
-    t_closest_packages: int = 30
+    batch_size: int = 75
+    k_near: int = 30
+    organise: bool = None
 
 def distributionBatch(
         instance: CVRPInstance, 
@@ -49,6 +52,12 @@ def distributionBatch(
             k_near,
             deliveries
         )
+
+def createBatchesPerPackets(deliveries, x: int):
+    """Criar lotes pelo numero de pacotes"""
+    final_list = lambda deliveries, x: [deliveries[i:i+x] for i in range(0, len(deliveries), x)]
+    batchs = final_list(deliveries, x)
+    return batchs
 
 def routingBatches(
             instance,
@@ -75,6 +84,49 @@ def routingBatches(
         )
         reallocate.append(poss)
     return order_batch
+
+def orderBatch(batch, instance, vehiclesPossibles, order, md):
+    """Se order = 1 é ordem crescente e -1 decrescente"""
+    if order != None:
+        packetsExist = whoIsOrder(vehiclesPossibles, instance)
+        for p in batch:
+            packetsExist.append(p)
+        orderBatch = buildMetric(instance, batch, packetsExist, order, md)
+    else:
+        orderBatch = batch
+    return 
+
+def whoIsOrder(vehiclesPossibles, instance):
+    deposit = instance.origin
+    packets = [deposit]
+    for k, v in vehiclesPossibles.items():
+        dep = 0
+        for id_pack in v[0]:
+            if dep == 0:
+                dep += 1
+            else:
+                packets.append(instance.deliveries[id_pack])
+    return packets
+
+def buildMetric(instance, batch, packetsExist, order, md):
+    distances_pack = {}
+    orderBatchList = []
+    for p in batch:
+        distances_pack[p.idu] = meanDistance(p, packetsExist, md)
+    # construir o batch crescente/decrescente
+    for i in sorted(distances_pack, key = distances_pack.get, reverse=order):
+        orderBatchList.append(instance.deliveries[i])
+    orderBatch = deque(orderBatchList)
+    return 
+
+def meanDistance(p, packetsExist, md):
+    d = 0
+    for atual in packetsExist:
+        if(type(atual) is Point):
+            d += md[0][p.idu+1]
+        else:
+            d += md[p.idu+1][atual.idu+1]
+    return d/len(packetsExist)
 
 def routePackage():
     d = 2
