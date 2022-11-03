@@ -50,6 +50,9 @@ class Delivery:
 
     size: int
     """Size it occupies in the vehicle (considered 1-D for simplicity)."""
+    
+    idu: int = 0
+    """Unique id numeric"""
 
 
 @dataclass
@@ -104,6 +107,12 @@ class CVRPSolutionVehicle:
         )
 
     @property
+    def no_return(self) -> List[Point]:
+        return (
+            [self.origin] + [d.point for d in self.deliveries]
+        )
+
+    @property
     def occupation(self) -> int:
         return sum([d.size for d in self.deliveries])
 
@@ -116,3 +125,10 @@ class CVRPSolution(JSONDataclassMixin):
     @property
     def deliveries(self):
         return [d for v in self.vehicles for d in v.deliveries]
+
+@dataclass
+class RoutePossible(JSONDataclassMixin):
+    route1: List[int]
+    route2: List[int]
+    gain: float
+    select: List[int]

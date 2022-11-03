@@ -13,7 +13,7 @@ from multiprocessing import Pool
 from argparse import ArgumentParser
 from pathlib import Path
 from tqdm import tqdm
-from loggibud.v1.distances import OSRMConfig
+from loggibud.v1.distances import *
 
 from loggibud.v1.types import (
     Point,
@@ -44,7 +44,6 @@ def distributionBatch(
     deliveries = []
     vehicles_possibles = {}
     batches = createBatchesPerPackets(instance.deliveries, batch_size)
-    vehicles = []
     for batch in tqdm(batches, desc="DESPATCHING BATCHES"):
         routingBatches(
             instance,
@@ -55,12 +54,75 @@ def distributionBatch(
             k_near,
             deliveries
         )
+        solution = buildSolution(instance, vehicles_possibles)
+        NUM_LOTE += 1
+    return solution
+
+def buildSolution(instance: CVRPInstance, vehicles_occupation):
+    """Cria a solução e o nome do arquivo json"""
+    # dir_out = "out/dinamic/"+city+"/"
+    # nameFile = "d"+instance.name+"batch-"+str(NUM_LOTE)+".json"
+    # filename = dir_out + nameFile
+    name = instance.name
+    vehicles = []
+    for k, v in vehicles_occupation.items():
+        vehicle = []
+        dep = 0
+        for id_pack in v[0]:
+            if dep == 0:
+                dep += 1
+                continue
+            else:
+                point = Point(
+                    lng=instance.deliveries[id_pack].point.lng, 
+                    lat=instance.deliveries[id_pack].point.lat
+                )
+                delivery = Delivery(
+                    id_pack,
+                    point,
+                    instance.deliveries[id_pack].size,
+                    instance.deliveries[id_pack].idu
+                )
+                vehicle.append(delivery)
+        vehicleConstruct = CVRPSolutionVehicle(origin=instance.origin, deliveries=vehicle)
+        vehicles.append(vehicleConstruct)
+    solution = CVRPSolution(name=name, vehicles=vehicles)
+    return solution #, filename
 
 def createBatchesPerPackets(deliveries, x: int):
     """Criar lotes pelo numero de pacotes"""
     final_list = lambda deliveries, x: [deliveries[i:i+x] for i in range(0, len(deliveries), x)]
     batchs = final_list(deliveries, x)
     return batchs
+
+
+def buildSolution(instance: CVRPInstance, vehicles_occupation):
+    """Cria a solução e o nome do arquivo json"""
+    name = instance.name
+    vehicles = []
+    for k, v in vehicles_occupation.items():
+        vehicle = []
+        dep = 0
+        for id_pack in v[0]:
+            if dep == 0:
+                dep += 1
+                continue
+            else:
+                point = Point(
+                    lng=instance.deliveries[id_pack].point.lng, 
+                    lat=instance.deliveries[id_pack].point.lat
+                )
+                delivery = Delivery(
+                    id_pack,
+                    point,
+                    instance.deliveries[id_pack].size,
+                    instance.deliveries[id_pack].idu
+                )
+                vehicle.append(delivery)
+        vehicleConstruct = CVRPSolutionVehicle(origin=instance.origin, deliveries=vehicle)
+        vehicles.append(vehicleConstruct)
+    solution = CVRPSolution(name=name, vehicles=vehicles)
+    return solution #, filename
 
 def routingBatches(
             instance,
@@ -357,8 +419,18 @@ if __name__ == "__main__":
     output_dir.mkdir(parents=True, exist_ok=True)
 
     def solve(file):
+        osrm_config = OSRMConfig(
+            host="http://ec2-34-222-175-250.us-west-2.compute.amazonaws.com"
+        )
         instance = CVRPInstance.from_file(file)
-
+        for i in range(len(instance.deliveries)):
+            instance.deliveries[i].idu = i
+        origin = [instance.origin]
+        deliveries = [d.point for d in instance.deliveries]
+        points = [*origin, *deliveries]
+        matrix_distance = calculate_distance_matrix_m(
+            points, osrm_config
+        )
         logger.info("Distribuition batch instance.")
         solution = distributionBatch(
             instance, 
