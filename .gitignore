@@ -7,6 +7,8 @@ data
 osrm
 osrm.zip
 brazil-201110.osm.pbf
+*.csv
+*.png
 
 # Testing
 .coverage
